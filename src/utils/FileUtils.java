@@ -45,4 +45,12 @@ public class FileUtils
         String newPath = path.substring(0, path.length() - source.getName().length()) + newName;
         return new FileAddition(new File( newPath));
     }
+
+    public static String getFileExtension(File file)
+    {
+        String fileName = file.getName();
+        if(fileName.lastIndexOf(".") != -1 && fileName.lastIndexOf(".") != 0)
+            return fileName.substring(fileName.lastIndexOf(".")+1);
+        else return "";
+    }
 }

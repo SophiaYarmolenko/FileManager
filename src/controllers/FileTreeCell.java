@@ -1,4 +1,8 @@
 package controllers;
+import app.Controller;
+import javafx.scene.Scene;
+import javafx.scene.control.TextArea;
+import javafx.stage.Stage;
 import utils.FileUtils;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ContextMenu;
@@ -17,6 +21,7 @@ import java.net.MalformedURLException;
 public class FileTreeCell extends TreeCell<FileAddition>
 {
     private static FileTreeItem itemToMove = null;
+
     private static Boolean isCopy = null;
 
     private MenuItem pasteItem = new MenuItem("Paste");
@@ -49,7 +54,13 @@ public class FileTreeCell extends TreeCell<FileAddition>
                 e.printStackTrace();
             }
         });
-        openFileItem.setOnAction(event -> openFile());
+        openFileItem.setOnAction(event -> {
+            try {
+                openFile();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
 
         contextMenu.getItems().addAll(copyItem, cutItem, deleteItem);
     }
@@ -106,9 +117,12 @@ public class FileTreeCell extends TreeCell<FileAddition>
         else
             {
                 itemToMove.removeThisFromParent();
-                try {
+                try
+                {
                     fileToMove.cut(destinationFile);
-                } catch (IOException e) {
+                }
+                catch (IOException e)
+                {
                     error(e, "moving");
                     return;
                 }
@@ -139,6 +153,23 @@ public class FileTreeCell extends TreeCell<FileAddition>
 
         try
         {
+            if(!fileToRemove.isFile())
+            {
+                if(fileToRemove.getFile().getAbsolutePath().substring(0,1).equals("D"))
+                {
+                    if(Controller.DfolderList.containsKey(fileToRemove.getFile().getName()))
+                    {
+                        Controller.DfolderList.remove(fileToRemove.getFile().getName());
+                    }
+                }
+                else
+                    {
+                        if(Controller.CfolderList.containsKey(fileToRemove.getFile().getName()))
+                        {
+                            Controller.CfolderList.remove(fileToRemove.getFile().getName());
+                        }
+                    }
+            }
             fileToRemove.delete();
             FileTreeItem item = (FileTreeItem) getTreeItem();
             item.removeThisFromParent();
@@ -149,22 +180,30 @@ public class FileTreeCell extends TreeCell<FileAddition>
         }
     }
 
-    private void openFile()
+    private void openFile() throws Exception
     {
         FileAddition currentFile = getTreeItem().getValue();
-        Desktop desktop = null;
-        if (Desktop.isDesktopSupported())
+        if(FileUtils.getFileExtension(currentFile.getFile()).equals("html"))
         {
-            desktop = Desktop.getDesktop();
+            OpenHtml openHtml = new OpenHtml(currentFile.getFile());
+            openHtml.open();
         }
-        try
-        {
-            desktop.open(currentFile.getFile());
-        }
-        catch (IOException ioe)
-        {
-            ioe.printStackTrace();
-        }
+        else
+            {
+                Desktop desktop = null;
+                if (Desktop.isDesktopSupported())
+                {
+                    desktop = Desktop.getDesktop();
+                }
+                try
+                {
+                    desktop.open(currentFile.getFile());
+                }
+                catch (IOException ioe)
+                {
+                    ioe.printStackTrace();
+                }
+            }
     }
     private void createNewFolder()
     {
@@ -259,6 +298,7 @@ public class FileTreeCell extends TreeCell<FileAddition>
 
             try
             {
+                String previousName = fileExtension.getName();
                 fileExtension.rename(destinationFile);
                 updateItem();
                 super.commitEdit(fileExtension);

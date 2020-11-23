@@ -1,4 +1,5 @@
 package controllers;
+import app.Controller;
 import utils.Icons;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -18,12 +19,34 @@ public class FileTreeItem extends TreeItem<FileAddition>
     {
         super(value);
         hasLoadedChilds = false;
+        if(!isLeaf())
+        {
+            if(getValue().getAbsolutePath().substring(0,1).equals("D"))
+            {
+                Controller.DfolderList.put(getValue().getName(), getValue().getAbsolutePath());
+            }
+            else
+                {
+                    Controller.CfolderList.put(getValue().getName(), getValue().getAbsolutePath());
+                }
+        }
     }
 
     public FileTreeItem(FileAddition value, Node graphic)
     {
         super(value, graphic);
         hasLoadedChilds = false;
+        if(!isLeaf())
+        {
+            if(getValue().getAbsolutePath().substring(0,1).equals("D"))
+            {
+                Controller.DfolderList.put(getValue().getName(), getValue().getAbsolutePath());
+            }
+            else
+            {
+                Controller.CfolderList.put(getValue().getName(), getValue().getAbsolutePath());
+            }
+        }
     }
 
     @Override

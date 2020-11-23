@@ -1,16 +1,16 @@
 package app;
 
-import controllers.FileTreeCell;
-import controllers.FileTreeItem;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import controllers.*;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.FlowPane;
 import utils.FileAddition;
 
-import java.util.Collection;
-import java.util.LinkedList;
+import java.io.File;
+import java.net.MalformedURLException;
+import java.util.HashMap;
+
 
 public class Controller
 {
@@ -18,9 +18,10 @@ public class Controller
     private FileTreeItem DfileTreeItem;
     private TreeView<FileAddition> CfileView;
     private FileTreeItem CfileTreeItem;
-
-    private TreeView<FileAddition> DfileSearchView;
-    private TreeView<FileAddition> CfileSearchView;
+    private static final int SCROLL_PANE_PREF_WIDTH = 350;
+    private static final int VIEW_ITEM_PREF_HEIGHT = 60;
+    public static HashMap<String, String> DfolderList = new HashMap<>();
+    public static HashMap<String, String> CfolderList = new HashMap<>();
 
     @FXML
     private AnchorPane mainAnchorPane;
@@ -30,12 +31,6 @@ public class Controller
 
     @FXML
     private ScrollPane DfileScrollPane;
-
-    @FXML
-    private ScrollPane СfileSearchScrollPane;
-
-    @FXML
-    private ScrollPane DfileSearchScrollPane;
 
     @FXML
     private Button CSearchButton;
@@ -50,10 +45,36 @@ public class Controller
     private Button DSearchButton;
 
     @FXML
-    void initialize()
+    private ScrollPane DfileSearchScrollPane;
+
+    @FXML
+    private MenuButton DFolderMenu;
+
+    @FXML
+    private ScrollPane CfileSearchScrollPane;
+
+    @FXML
+    private MenuButton CFolderMenu;
+
+    @FXML
+    void initialize() throws MalformedURLException
     {
+        DfolderList.clear();
+        CfolderList.clear();
         initializeC();
         initializeD();
+        setDFolderMenu();
+        setCFolderMenu();
+        DSearchButton.setOnAction(actionEvent ->
+        {
+            String DFolderToSearch = DFolderMenu.getText();
+            searchInD(DFolderToSearch);
+        });
+        CSearchButton.setOnAction(actionEvent ->
+        {
+            String CFolderToSearch = CFolderMenu.getText();
+            searchInC(CFolderToSearch);
+        });
     }
 
     private void initializeC()
@@ -81,22 +102,64 @@ public class Controller
         DfileScrollPane.setFitToHeight(true);
         DfileScrollPane.setFitToWidth(true);
     }
-
-    private void search()
+    private void searchInD(String DFolderToSearch)
     {
-        CfileSearchView = new TreeView<>();
-
-
-        search();
-        CfileScrollPane.setContent(CfileSearchView);
+        String limitation = DSearchTextField.getText();
+        search(DfileSearchScrollPane, new FileAddition(new File(DfolderList.get(DFolderToSearch))), limitation);
+    }
+    private void setDFolderMenu()
+    {
+        for(String folder:DfolderList.keySet())
+        {
+            if(folder.equals(""))
+                continue;
+            MenuItem item = new MenuItem(folder);
+            item.setOnAction(actionEvent -> { DFolderMenu.setText(folder); }
+            );
+            DFolderMenu.getItems().add(item);
+        }
     }
 
-    private void search(TreeItem<FileAddition> item)
+    private void searchInC(String CFolderToSearch)
     {
-        ObservableList<FileAddition> list = FXCollections.observableArrayList();
-            if(item.isLeaf())
-                //CfileSearchView.setCellFactory(param->new FileTreeCell());
-        CfileSearchView.setCellFactory(list);
+        String limitation = CSearchTextField.getText();
+        search(CfileSearchScrollPane, new FileAddition(new File(CfolderList.get(CFolderToSearch))), limitation);
     }
 
+    private void setCFolderMenu()
+    {
+        for(String folder:CfolderList.keySet())
+        {
+            if(folder.equals(""))
+                continue;
+            MenuItem item = new MenuItem(folder);
+            item.setOnAction(actionEvent -> { CFolderMenu.setText(folder); }
+            );
+            CFolderMenu.getItems().add(item);
+        }
+    }
+
+    private void search(ScrollPane fileSearchScrollPane, FileAddition fileRootSearch, String limitation)
+    {
+        FileTreeItem fileTreeItemSearch = new FileTreeItem(fileRootSearch);
+        FileSearcher fileSearcher = new FileSearcher(fileTreeItemSearch, limitation);
+        final FlowPane container = new FlowPane();
+        container.setPrefWidth(SCROLL_PANE_PREF_WIDTH);
+
+        for (FileTreeItem fileItem : fileSearcher.search())
+        {
+            TreeView<FileAddition> fileSearchView = new TreeView<>(fileItem);
+            fileSearchView.setShowRoot(true);
+            fileSearchView.setEditable(true);
+            fileSearchView.setCellFactory(param -> new FileTreeCell());
+            fileSearchView.setPrefWidth(SCROLL_PANE_PREF_WIDTH);
+            fileSearchView.setPrefHeight(VIEW_ITEM_PREF_HEIGHT);
+            container.getChildren().add(fileSearchView);
+        }
+
+        fileSearchScrollPane.setContent(container);
+        fileSearchScrollPane.contentProperty();
+        fileSearchScrollPane.setFitToHeight(true);
+        fileSearchScrollPane.setFitToWidth(true);
+    }
 }

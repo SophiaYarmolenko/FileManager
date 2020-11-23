@@ -1,10 +1,13 @@
 package app;
 
+import controllers.HtmlEditorController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+
+import java.io.File;
 
 public class Main extends Application
 {
@@ -13,7 +16,7 @@ public class Main extends Application
     {
         Parent root = FXMLLoader.load(getClass().getResource("fileManager.fxml"));
         primaryStage.setTitle("File manager");
-        primaryStage.setScene(new Scene(root, 1500, 750));
+        primaryStage.setScene(new Scene(root, 1500, 650));
         primaryStage.show();
     }
 
