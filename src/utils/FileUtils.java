@@ -5,6 +5,7 @@ import java.io.*;
 
 public class FileUtils
 {
+    private final static int LENGTH_OF_EXTENSION = 4;
     public static FileAddition getResultOfMovement(FileAddition source, FileAddition folderDestination )
     {
         String fileName = source.getName();
@@ -19,7 +20,7 @@ public class FileUtils
         while (newFile.exists())
         {
             i++;
-            if(filePath.substring(filePath.length()-4, filePath.length()).equals(".txt"))
+            if(filePath.substring(filePath.length() - LENGTH_OF_EXTENSION).equals(".txt"))
             {
                 newFile = new File(filePath.substring(0, filePath.length()-4) + " (" + i + ")"+".txt");
             }
@@ -52,5 +53,28 @@ public class FileUtils
         if(fileName.lastIndexOf(".") != -1 && fileName.lastIndexOf(".") != 0)
             return fileName.substring(fileName.lastIndexOf(".")+1);
         else return "";
+    }
+
+    public static void rewriteFile(File file, String newFileText)
+    {
+        FileWriter fileWriter = null;
+        try
+        {
+            fileWriter = new FileWriter(file);
+            fileWriter.write(newFileText);
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        finally
+        {
+            try
+            {
+                fileWriter.close();
+            } catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
     }
 }

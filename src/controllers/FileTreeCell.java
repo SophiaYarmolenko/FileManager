@@ -183,10 +183,11 @@ public class FileTreeCell extends TreeCell<FileAddition>
     private void openFile() throws Exception
     {
         FileAddition currentFile = getTreeItem().getValue();
+        IOpenFileFactory openFile;
         if(FileUtils.getFileExtension(currentFile.getFile()).equals("html"))
         {
-            OpenHtml openHtml = new OpenHtml(currentFile.getFile());
-            openHtml.open();
+            openFile = new OpenHtml(currentFile.getFile());
+            openFile.open();
         }
         else
             {

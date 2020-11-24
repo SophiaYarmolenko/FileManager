@@ -4,7 +4,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.web.HTMLEditor;
 import javafx.stage.Stage;
@@ -12,9 +11,10 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.io.FileNotFoundException;
 
-public class OpenHtml
+public class OpenHtml implements IOpenFileFactory
 {
     private File file;
+
     OpenHtml(File file)
     {
         this.file = file;
@@ -80,8 +80,9 @@ public class OpenHtml
             String previousTagText = previousTag.getText();
             String newTagText = newTag.getText();
             finalHtmlEditorController.replaceTag(previousTagText, newTagText);
-            htmlCodeTextArea.setText(finalHtmlEditorController.fileText.toString());
+            htmlCodeTextArea.setText(finalHtmlEditorController.fileText);
             listOfTagsTextArea.setText(finalHtmlEditorController.getlistOfTags());
+            htmlEditor.setHtmlText(htmlCodeTextArea.getText());
         });
 
         FlowPane changeTagsAnchorPane = new FlowPane();

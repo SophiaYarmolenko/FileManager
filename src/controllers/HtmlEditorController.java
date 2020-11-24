@@ -1,17 +1,14 @@
 package controllers;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.TextArea;
 import javafx.scene.web.HTMLEditor;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import utils.FileUtils;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.HashSet;
 import java.util.Scanner;
 
@@ -20,19 +17,22 @@ public class HtmlEditorController
     @FXML
     private HTMLEditor htmlEditor = new HTMLEditor();
     private HashSet<String> htmlTags = new HashSet<>();
-    StringBuilder listOfTags = new StringBuilder("Tags:\n");
     private Document doc = null;
-    StringBuilder fileText = new StringBuilder();
+    String fileText;
+    File htmlFile;
 
     public HtmlEditorController(File htmlFile) throws FileNotFoundException
     {
+        StringBuilder fileTextStringBuilder = new StringBuilder();
+        this.htmlFile = htmlFile;
         FileReader fileReader = new FileReader(htmlFile);
         Scanner scanner = new Scanner(fileReader);
         while(scanner.hasNext())
         {
-            fileText.append(scanner.nextLine() + "\n");
+            fileTextStringBuilder.append(scanner.nextLine() + "\n");
         }
-        htmlEditor.setHtmlText(fileText.toString());
+        fileText = fileTextStringBuilder.toString();
+        htmlEditor.setHtmlText(fileText);
 
         try
         {
@@ -51,12 +51,13 @@ public class HtmlEditorController
 
     public String getHtmlCode()
     {
-        return fileText.toString();
+        return fileText;
     }
 
     public String getlistOfTags()
     {
-        listOfTags = new StringBuilder();
+        StringBuilder listOfTags = new StringBuilder();
+        htmlTags.clear();
         for(Element element : doc.getAllElements())
         {
             if(!htmlTags.contains(element.tagName()))
@@ -75,5 +76,12 @@ public class HtmlEditorController
         {
             element.tagName(newTag);
         }
+        fileText = fileText.replaceAll("<" + previousTag, "<"+newTag);
+        fileText = fileText.replaceAll("</" + previousTag + ">", "</"+newTag+">");
+        fileText = fileText.replaceAll("<\\s+" + previousTag, "<"+newTag);
+        fileText = fileText.replaceAll("</\\s+" + previousTag + "\\s+>", "</"+newTag+">");
+        FileUtils.rewriteFile(htmlFile, fileText);
+
     }
+
 }
